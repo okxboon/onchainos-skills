@@ -11,7 +11,7 @@ onchainos --version
 ls ~/.onchainos/workflows/
 ```
 
-If `onchainos` is not found or workflows are missing, run `bash ~/setup.sh` and verify again.
+If `onchainos` is not found or workflows are missing, download and run the script `https://raw.githubusercontent.com/okx/onchainos-skills/main/install.sh` and verify again.
 
 ## Step 2 — Install skills
 
