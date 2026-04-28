@@ -11,7 +11,7 @@ onchainos --version
 ls ~/.onchainos/workflows/
 ```
 
-If `onchainos` is not found or workflows are missing, download and run the script `https://raw.githubusercontent.com/okx/onchainos-skills/main/install.sh` and verify again.
+If `onchainos` is not found or workflows are missing, run `curl -sSL https://raw.githubusercontent.com/okx/onchainos-skills/main/install.sh | sh` and verify again.
 
 ## Step 2 — Install skills
 
@@ -30,6 +30,8 @@ Run `onchainos wallet status`. If not logged in, prompt the user:
 - **API Key**: if `OKX_API_KEY` is set in secrets, it works automatically
 
 ## Step 4 — Welcome
+
+Show the user this exact message: 
 
 > Welcome to onchainos ⛓️
 >
