@@ -5,12 +5,9 @@
 
 set -e
 
-echo "[onchainos] Starting setup..."
 echo "[onchainos] Installing CLI + workflows..."
 
 curl -sSL https://raw.githubusercontent.com/okx/onchainos-skills/main/install.sh | sh
-
-echo "[onchainos] Install script completed."
 
 # ── Ensure onchainos is on PATH ──────────────────────────────
 INSTALL_DIR="$HOME/.local/bin"
@@ -51,9 +48,8 @@ done
 if command -v onchainos >/dev/null 2>&1; then
   echo "[onchainos] $(onchainos --version) is ready"
 else
-  echo "[onchainos] WARNING: installed to $INSTALL_DIR but not found on PATH."
-  echo "[onchainos] Run: export PATH=\"$INSTALL_DIR:\$PATH\""
+  echo "[onchainos] ERROR: onchainos not found on PATH after install."
+  echo "[onchainos] Checked: $INSTALL_DIR/onchainos exists = $([ -f "$INSTALL_DIR/onchainos" ] && echo yes || echo no)"
+  echo "[onchainos] PATH = $PATH"
   exit 1
 fi
-
-echo "[onchainos] Setup complete."
