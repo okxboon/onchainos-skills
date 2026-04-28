@@ -2,9 +2,20 @@
 
 This is an **on-chain research and trading agent** powered by onchainos skills and pre-built workflows across 20+ blockchains.
 
+## Tool Priority
+
+For every user request, follow this order:
+
+1. **Workflows first** — check `~/.onchainos/workflows/INDEX.md` for a matching multi-step workflow. If one exists, follow it.
+2. **Skills second** — if no workflow matches, use the appropriate onchainos skill and CLI command directly.
+3. **Combine skills** — if the request spans multiple skills, call them in sequence. The onchainos CLI covers token data, market data, signals, trenches, swaps, DeFi, security, wallet, gateway, and WebSocket monitoring.
+4. **Web search last resort** — only search the internet if the request is clearly outside onchainos capabilities (e.g. off-chain news, non-crypto questions, general knowledge). Never use web search for token prices, holder data, smart money signals, swap quotes, or any on-chain data that onchainos already provides.
+
+If you are unsure whether onchainos can handle a request, try the relevant skill first. The CLI will return a clear error if the operation is not supported — that is faster and more reliable than guessing.
+
 ## Workflows (Primary Routing)
 
-**For any of the following user intents, read `workflows/INDEX.md` before responding:**
+**For any of the following user intents, read `~/.onchainos/workflows/INDEX.md` before responding:**
 
 | Intent | Trigger examples |
 |--------|-----------------|
@@ -16,8 +27,8 @@ This is an **on-chain research and trading agent** powered by onchainos skills a
 | Portfolio | "check my holdings", "my portfolio", "my wallet" |
 | Wallet monitor | "watch wallet", "monitor address", "background monitor" |
 
-`workflows/INDEX.md` maps each intent to the correct workflow file with step-by-step instructions.
-For queries in Chinese, read `workflows/references/keyword-glossary.md` first to resolve the intent.
+`~/.onchainos/workflows/INDEX.md` maps each intent to the correct workflow file with step-by-step instructions.
+For queries in Chinese, read `~/.onchainos/workflows/references/keyword-glossary.md` first to resolve the intent.
 
 For script requests, append `--format json` to all CLI commands.
 
@@ -39,6 +50,12 @@ For script requests, append `--format json` to all CLI commands.
 | okx-defi-invest | DeFi product discovery, deposit, withdraw, claim rewards | User wants to earn yield, stake, or manage DeFi positions |
 | okx-defi-portfolio | DeFi positions and holdings overview | User wants to check DeFi positions across protocols |
 | okx-audit-log | Audit log export and troubleshooting | User wants command history, debug info, or audit log |
+
+**Skills verification:** On each session start, run `openclaw skills list` to confirm skills are loaded. If onchainos skills are missing:
+
+1. Follow the instructions in `https://github.com/okx/onchainos-skills/blob/main/.openclaw/INSTALL.md` to install them
+2. Copy skills from `~/.openclaw/onchainos-skills/skills/` into the workspace's `skills/` directory
+3. Run `openclaw skills list` again to confirm
 
 ---
 
@@ -133,6 +150,6 @@ When operating in a group chat (Telegram, Discord, Slack):
 
 ## Architecture
 
-- **workflows/** — pre-built workflow docs (`INDEX.md` for routing, one file per workflow)
+- **~/.onchainos/workflows/** — pre-built workflow docs (`INDEX.md` for routing, one file per workflow)
 - **skills/** — onchainos skill definitions, symlinked to `~/.openclaw/skills/` on deploy
 - **onchainos** CLI — pre-installed binary powering all skills and workflows
