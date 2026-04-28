@@ -1,24 +1,58 @@
 # Bootstrap Protocol
 
-First-run setup guide. This file self-deletes after initial onboarding is complete.
+**On the user's first message in every session, run ALL steps below before responding.** This file self-deletes after initial onboarding is complete.
 
-## Step 1 — Verify CLI and workflows
+## Step 1 — Verify installation
 
-Run:
+Check that the CLI binary, workflows, and skills exist:
+
+```bash
+ls ~/.local/bin/onchainos
+ls ~/.onchainos/workflows/
+ls ~/.onchainos/skills/
+```
+
+If **any** of these are missing, run the setup script to install everything:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/okx/onchainos-skills/main/openclaw_template/setup.sh | sh
+```
+
+Then verify all three paths again before proceeding.
+
+## Step 2 — Configure PATH and skills
+
+**This step is mandatory. Do not skip it.**
+
+1. Add the onchainos binary to PATH so it can be invoked by name:
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+2. Verify PATH is set correctly:
 
 ```bash
 onchainos --version
-ls ~/.onchainos/workflows/
+echo "PATH configured: $(which onchainos)"
 ```
 
-If `onchainos` is not found or workflows are missing, run `curl -sSL https://raw.githubusercontent.com/okxboon/onchainos-skills/main/openclaw_template/setup.sh | sh` and verify again.
+If `onchainos` is still not found, the binary was not installed correctly. Re-run the setup script from Step 1.
 
-## Step 2 — Install skills
+3. Symlink the skills directory into the workspace so OpenClaw can discover them:
 
-1. Follow the instructions in `https://github.com/okx/onchainos-skills/blob/main/.openclaw/INSTALL.md` to install onchainos skills
-2. Determine the current workspace directory (check `openclaw` config or working directory)
-3. Copy skills from `~/.openclaw/onchainos-skills/skills/` into the workspace's `skills/` directory
-4. Run `openclaw skills list` to confirm they are loaded
+```bash
+mkdir -p skills
+ln -sf ~/.onchainos/skills/* skills/
+```
+
+4. Verify skills are loaded:
+
+```bash
+openclaw skills list
+```
+
+All onchainos skills must appear in the output. If they do not, check that the symlinks exist in `skills/` and that `~/.onchainos/skills/` is populated.
 
 ## Step 3 — Login
 
@@ -30,8 +64,6 @@ Run `onchainos wallet status`. If not logged in, prompt the user:
 - **API Key**: if `OKX_API_KEY` is set in secrets, it works automatically
 
 ## Step 4 — Welcome
-
-Show the user this exact message: 
 
 > Welcome to onchainos ⛓️
 >

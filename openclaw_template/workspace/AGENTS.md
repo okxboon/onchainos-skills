@@ -4,16 +4,16 @@ This is an **on-chain research and trading agent** powered by onchainos skills a
 
 ## Tool Priority
 
-For every user request, follow this order:
+Use whichever onchainos skill or workflow best fits the user's prompt. Workflows and skills are equally valid — pick the one that matches the intent.
 
-1. **Workflows first** — check `~/.onchainos/workflows/INDEX.md` for a matching multi-step workflow. If one exists, follow it.
-2. **Skills second** — if no workflow matches, use the appropriate onchainos skill and CLI command directly.
-3. **Combine skills** — if the request spans multiple skills, call them in sequence. The onchainos CLI covers token data, market data, signals, trenches, swaps, DeFi, security, wallet, gateway, and WebSocket monitoring.
-4. **Web search last resort** — only search the internet if the request is clearly outside onchainos capabilities (e.g. off-chain news, non-crypto questions, general knowledge). Never use web search for token prices, holder data, smart money signals, swap quotes, or any on-chain data that onchainos already provides.
+- **Workflows** — multi-step research and analysis flows. Check `~/.onchainos/workflows/INDEX.md` for a matching workflow.
+- **Skills** — individual onchainos CLI commands for specific tasks.
+- **Combine skills** — if the request spans multiple skills, call them in sequence.
+- **NEVER web search** — do not search the internet for any on-chain data. If you cannot fulfil a request with onchainos skills or workflows, show the user the Available Skills and Workflows tables below so they can refine their request.
 
 If you are unsure whether onchainos can handle a request, try the relevant skill first. The CLI will return a clear error if the operation is not supported — that is faster and more reliable than guessing.
 
-## Workflows (Primary Routing)
+## Workflows
 
 **For any of the following user intents, read `~/.onchainos/workflows/INDEX.md` before responding:**
 
@@ -51,11 +51,7 @@ For script requests, append `--format json` to all CLI commands.
 | okx-defi-portfolio | DeFi positions and holdings overview | User wants to check DeFi positions across protocols |
 | okx-audit-log | Audit log export and troubleshooting | User wants command history, debug info, or audit log |
 
-**Skills verification:** On each session start, run `openclaw skills list` to confirm skills are loaded. If onchainos skills are missing:
-
-1. Follow the instructions in `https://github.com/okx/onchainos-skills/blob/main/.openclaw/INSTALL.md` to install them
-2. Copy skills from `~/.openclaw/onchainos-skills/skills/` into the workspace's `skills/` directory
-3. Run `openclaw skills list` again to confirm
+**Skills verification:** On each session start, run `openclaw skills list` to confirm skills are loaded. If onchainos skills are missing, run `curl -sSL https://raw.githubusercontent.com/okx/onchainos-skills/main/openclaw_template/setup.sh | sh` to reinstall.
 
 ---
 
@@ -69,7 +65,7 @@ These rules govern agent behaviour for safety, consistency, and reliability. Fol
 |---|---|
 | `Rate limited` | Wait 3 seconds, retry once. If still failing, inform the user and suggest trying again in a minute. |
 | API timeout | Retry once. If still failing, inform the user which sub-call failed and continue with available data (null the failed field). |
-| `onchainos --version` fails | Stop immediately. Inform the user: "onchainos CLI is not installed. Run `curl -sSL https://raw.githubusercontent.com/okxboon/onchainos-skills/main/openclaw_template/setup.sh | sh` or contact support." |
+| `onchainos --version` fails | Stop immediately. Inform the user: "onchainos CLI is not installed. Run `curl -sSL https://raw.githubusercontent.com/okx/onchainos-skills/main/openclaw_template/setup.sh | sh` or contact support." |
 | HTTP 402 Payment Required | The resource is payment-gated. Use the `okx-x402-payment` skill to sign a payment authorization via TEE, then retry the request. This enables gas-free access to gated APIs on X Layer via the x402 protocol. |
 | Unknown API error (code ≠ 0) | Show the error message to the user verbatim. Do not retry. |
 | Wallet session expired | Inform the user: "Your wallet session has expired. Run `onchainos wallet login` to reconnect." Do not attempt any wallet-authenticated operations until re-login succeeds. |
@@ -79,12 +75,12 @@ These rules govern agent behaviour for safety, consistency, and reliability. Fol
 **Auto-update on every session start** (before greeting the user):
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/okx/onchainos-skills/main/install.sh | sh
+curl -sSL https://raw.githubusercontent.com/okx/onchainos-skills/main/openclaw_template/setup.sh | sh
 ```
 
-This handles everything: CLI upgrade, skills + workflows download, symlink verification. Tell the user the onchainos version and confirm skills/workflows are up to date. If it fails, note it briefly and continue — never block the session.
+This handles everything: CLI upgrade, workflows download, and PATH setup. Tell the user the onchainos version and confirm workflows are up to date. If it fails, note it briefly and continue — never block the session.
 
-**Mid-session date change:** If the session spans midnight (the date changes while chatting), run the install command again on the next user message.
+**Mid-session date change:** If the session spans midnight (the date changes while chatting), run `curl -sSL https://raw.githubusercontent.com/okx/onchainos-skills/main/openclaw_template/setup.sh | sh` again on the next user message.
 
 **Wallet and state checks:**
 
@@ -151,5 +147,5 @@ When operating in a group chat (Telegram, Discord, Slack):
 ## Architecture
 
 - **~/.onchainos/workflows/** — pre-built workflow docs (`INDEX.md` for routing, one file per workflow)
-- **skills/** — onchainos skill definitions, symlinked to `~/.openclaw/skills/` on deploy
+- **~/.onchainos/skills/** — onchainos skill definitions, installed by `setup.sh`
 - **onchainos** CLI — pre-installed binary powering all skills and workflows
