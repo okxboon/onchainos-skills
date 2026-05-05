@@ -102,7 +102,7 @@ Your literal next message must be **exactly** the following block, with no addit
 
 > Welcome to onchainos ⛓️
 >
-> To use this agent, log in with your OKX-registered email — I'll send you a verification code. Your wallet is TEE-secured: the agent never sees your private key.
+> To use this agent, log in with your email — I'll send you a verification code. Your wallet is TEE-secured: the agent never sees your private key.
 >
 > What's your email?
 
