@@ -35,13 +35,6 @@
     }
   ],
 
-  "skills": [
-    {
-      "name": "okx-dex-market",
-      "cid": "bafybeidalohxk2i7r5ymmq6thjjz3uvgzpabcgmm2o2ie7ulbzfmf4v2da"
-    }
-  ],
-
   "scripts": {
     "build": "bash setup.sh",
     "start": ""
