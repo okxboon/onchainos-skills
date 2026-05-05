@@ -25,8 +25,11 @@ RUNTIME_PATH="$(sh -c 'echo $PATH')"
 echo "[onchainos] runtime PATH: $RUNTIME_PATH"
 echo "[onchainos] writable dirs on runtime PATH:"
 echo "$RUNTIME_PATH" | tr ':' '\n' | while read -r d; do
-  [ -n "$d" ] && [ -d "$d" ] && [ -w "$d" ] && echo "[onchainos]   $d"
-done
+  if [ -n "$d" ] && [ -d "$d" ] && [ -w "$d" ]; then
+    echo "[onchainos]   $d"
+  fi
+  :
+done || true
 NPM_PREFIX=""
 NPM_BIN=""
 if command -v npm >/dev/null 2>&1; then
@@ -102,7 +105,7 @@ if [ -z "$INSTALLED_VIA" ] || [ -z "$(ls -A "$SKILLS_DIR" 2>/dev/null)" ]; then
   if [ -d "$REPO_DIR/.git" ]; then
     git -C "$REPO_DIR" pull --ff-only || true
   else
-    git clone https://github.com/okx/onchainos-skills "$REPO_DIR"
+    git clone https://github.com/okx/onchainos-skills "$REPO_DIR" || true
   fi
   cp -r "$REPO_DIR/skills/"* "$SKILLS_DIR/" 2>/dev/null || true
   INSTALLED_VIA="git"
