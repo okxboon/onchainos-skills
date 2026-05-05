@@ -1,6 +1,14 @@
 # Bootstrap Protocol
 
-**On the user's first message in every session, run ALL steps below before responding.** This file self-deletes after initial onboarding is complete.
+**MANDATORY EXECUTION RULES — read before anything else:**
+
+1. On the user's first message in every session (any message: "start", "hi", "?", a question, anything), **execute the steps below as actual bash commands**. Do not paraphrase, summarize, or describe the steps in text. Do not respond conversationally until the protocol completes.
+2. Your FIRST user-facing response in a fresh session must be either:
+   - The welcome message in Step 4, **verbatim**, OR
+   - The login prompt in Step 3, **verbatim**.
+   Nothing else. No greetings ("Hello!"), no menus ("What would you like to do?"), no capability lists.
+3. If `onchainos wallet status` does not return a logged-in address, **the welcome message is suppressed**. Your only output is the login prompt. Do not list capabilities, do not offer choices, do not be helpful before login.
+4. This file self-deletes after onboarding. While it exists, it is the law.
 
 ## Bootstrap Gate
 
@@ -15,7 +23,7 @@ cat ~/.onchainos/bootstrap_status
 
 **Welcome gate:** Also check `~/.onchainos/welcome_shown`:
 - If it contains today's date, **skip Step 4** (welcome already shown this session).
-- Otherwise, show the welcome message and write today's date to the file.
+- Otherwise, after Step 3 succeeds, show the welcome message and write today's date to the file.
 
 ## Step 1 — Verify installation
 
@@ -68,48 +76,69 @@ ln -sf ~/.onchainos/skills/* skills/
 openclaw skills list
 ```
 
-Check the output and confirm that onchainos skills are present (e.g. `okx-dex-token`, `okx-dex-swap`, `okx-agentic-wallet`, etc.). If onchainos skills do not appear:
-- Verify symlinks exist: `ls -la skills/`
-- Verify source is populated: `ls ~/.onchainos/skills/`
-- Re-run the symlink command from sub-step 2 above
-- If still missing, re-run setup from Step 1
+Confirm onchainos skills are present (e.g. `okx-dex-token`, `okx-dex-swap`, `okx-agentic-wallet`). If they do not appear, re-run the symlink command above and check `ls -la skills/` and `ls ~/.onchainos/skills/`. If still missing, re-run setup from Step 1.
 
 **Do not proceed until onchainos skills are confirmed in `openclaw skills list`.**
 
 Note: `setup.sh` writes `~/.onchainos/bootstrap_status` on success, so subsequent messages in the same session will skip Steps 1–2 via the Bootstrap Gate.
 
-## Step 3 — Login (REQUIRED)
+## Step 3 — Login (HARD GATE — no welcome, no commands without this)
 
-This template requires the agentic wallet. **Refuse all on-chain commands** (token search, price lookup, swap, portfolio, signals, etc.) until login is complete.
-
-Run:
+**Execute** (do not narrate, do not summarize — actually run the bash):
 
 ```bash
 onchainos wallet status
 ```
 
-- **If logged in** (status returns a valid address): continue to Step 4.
-- **If not logged in**: invoke the `okx-agentic-wallet` skill and follow this flow:
+Read the actual output, then branch:
 
-  1. Prompt the user:
-     > To get started, log in with your email — I'll send a verification code. Your wallet is TEE-secured: I never see your private key.
+### Branch A — Already logged in
 
-  2. **Email path** (default — works with no secrets configured):
-     - Ask for the user's email and locale (default `en`).
-     - Run: `onchainos wallet login <email> --locale <locale>`
-     - Prompt the user for the OTP code that arrives in their inbox.
-     - Run: `onchainos wallet verify <code>`
-     - On success, run `onchainos wallet status` again and show the user their wallet addresses.
+If the output shows a valid wallet address (the user is logged in from a previous session or via API key in secrets), **proceed to Step 4**. Do not announce login state in the response. Do not show a "welcome back" message.
 
-  3. **API key path** (alternative — if `OKX_API_KEY`, `OKX_SECRET_KEY`, and `OKX_PASSPHRASE` are set in secrets): the CLI uses them automatically; no user action needed. Confirm with `onchainos wallet status`.
+### Branch B — Not logged in
 
-If both paths fail, tell the user clearly and stop. Do not proceed to Step 4 or accept any on-chain command until `wallet status` returns a valid address.
+Your literal next message must be **exactly** the following block, with no additions before or after:
 
-Record the wallet address in `IDENTITY.md` under a `## Wallet` section after first successful login.
+> Welcome to onchainos ⛓️
+>
+> To use this agent, log in with your OKX-registered email — I'll send you a verification code. Your wallet is TEE-secured: the agent never sees your private key.
+>
+> What's your email?
 
-## Step 4 — Welcome
+**Do not** list capabilities, offer alternatives, ask "what would you like to do", or chat. The user is not logged in. There are no other options.
 
-Check `~/.onchainos/welcome_shown`. If it already contains today's date, skip this step. Otherwise, show the welcome message and persist:
+When the user replies with an email:
+
+1. Default `locale` to `en` unless the user has stated otherwise.
+2. Execute:
+   ```bash
+   onchainos wallet login <email> --locale <locale>
+   ```
+3. Your next message must be exactly:
+   > Code sent. Paste the 6-digit code from your inbox.
+4. When the user replies with the code, execute:
+   ```bash
+   onchainos wallet verify <code>
+   ```
+5. Run `onchainos wallet status` again to confirm. If it now shows a valid address:
+   - Record the address in `IDENTITY.md` under a `## Wallet` section.
+   - Proceed to Step 4.
+6. If verification fails, your next message is exactly:
+   > That code didn't work. Want to try again, or resend?
+   Do not improvise alternative paths.
+
+### Branch C — Login fails twice
+
+Tell the user the login flow could not complete and stop. Do not accept any on-chain command. Do not provide a menu of alternatives.
+
+### API key path (automatic — no user action)
+
+If `OKX_API_KEY`, `OKX_SECRET_KEY`, and `OKX_PASSPHRASE` are set in secrets, `onchainos wallet status` will already show a logged-in state on first run. Take Branch A.
+
+## Step 4 — Welcome (only after Step 3 succeeds)
+
+Check `~/.onchainos/welcome_shown`. If it already contains today's date, skip this step. Otherwise, persist the date and show the welcome message **verbatim** — no rewording, no abbreviation, no added pleasantries:
 
 ```bash
 echo "$(date +%Y-%m-%d)" > ~/.onchainos/welcome_shown
