@@ -39,29 +39,30 @@ Then verify all three paths again before proceeding.
 
 **This step is mandatory. Do not skip it.**
 
-1. Add the onchainos binary to PATH so it can be invoked by name:
-
-```bash
-export PATH="$HOME/.local/bin:$PATH"
-```
-
-2. Verify PATH is set correctly:
+1. Verify the bare `onchainos` command resolves (the build symlinks it onto a PATH directory):
 
 ```bash
 onchainos --version
 echo "PATH configured: $(which onchainos)"
 ```
 
-If `onchainos` is still not found, the binary was not installed correctly. Re-run the setup script from Step 1.
+If `onchainos` is not found, the build did not symlink the binary into a runtime-PATH directory. As a session-local fallback, add `~/.local/bin` to PATH:
 
-3. Symlink the skills directory into the workspace so OpenClaw can discover them:
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+onchainos --version
+```
+
+If still not found, the binary was not installed correctly. Re-run the setup script from Step 1.
+
+2. Symlink the skills directory into the workspace so OpenClaw can discover them:
 
 ```bash
 mkdir -p skills
 ln -sf ~/.onchainos/skills/* skills/
 ```
 
-4. Verify onchainos skills are loaded:
+3. Verify onchainos skills are loaded:
 
 ```bash
 openclaw skills list
@@ -70,21 +71,41 @@ openclaw skills list
 Check the output and confirm that onchainos skills are present (e.g. `okx-dex-token`, `okx-dex-swap`, `okx-agentic-wallet`, etc.). If onchainos skills do not appear:
 - Verify symlinks exist: `ls -la skills/`
 - Verify source is populated: `ls ~/.onchainos/skills/`
-- Re-run the symlink command from sub-step 3 above
+- Re-run the symlink command from sub-step 2 above
 - If still missing, re-run setup from Step 1
 
 **Do not proceed until onchainos skills are confirmed in `openclaw skills list`.**
 
 Note: `setup.sh` writes `~/.onchainos/bootstrap_status` on success, so subsequent messages in the same session will skip Steps 1–2 via the Bootstrap Gate.
 
-## Step 3 — Login
+## Step 3 — Login (REQUIRED)
 
-Run `onchainos wallet status`. If not logged in, prompt the user:
+This template requires the agentic wallet. **Refuse all on-chain commands** (token search, price lookup, swap, portfolio, signals, etc.) until login is complete.
 
-> To get started, log in with your email — I'll send a verification code.
+Run:
 
-- **Email provided**: run `onchainos wallet login <email> --locale <locale>`, prompt for OTP, run `onchainos wallet verify <code>`, show wallet addresses
-- **API Key**: if `OKX_API_KEY` is set in secrets, it works automatically
+```bash
+onchainos wallet status
+```
+
+- **If logged in** (status returns a valid address): continue to Step 4.
+- **If not logged in**: invoke the `okx-agentic-wallet` skill and follow this flow:
+
+  1. Prompt the user:
+     > To get started, log in with your email — I'll send a verification code. Your wallet is TEE-secured: I never see your private key.
+
+  2. **Email path** (default — works with no secrets configured):
+     - Ask for the user's email and locale (default `en`).
+     - Run: `onchainos wallet login <email> --locale <locale>`
+     - Prompt the user for the OTP code that arrives in their inbox.
+     - Run: `onchainos wallet verify <code>`
+     - On success, run `onchainos wallet status` again and show the user their wallet addresses.
+
+  3. **API key path** (alternative — if `OKX_API_KEY`, `OKX_SECRET_KEY`, and `OKX_PASSPHRASE` are set in secrets): the CLI uses them automatically; no user action needed. Confirm with `onchainos wallet status`.
+
+If both paths fail, tell the user clearly and stop. Do not proceed to Step 4 or accept any on-chain command until `wallet status` returns a valid address.
+
+Record the wallet address in `IDENTITY.md` under a `## Wallet` section after first successful login.
 
 ## Step 4 — Welcome
 
